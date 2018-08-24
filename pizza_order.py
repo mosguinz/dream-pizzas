@@ -162,8 +162,7 @@ def get_address():
                          EXAMPLES.format('Green Island',
                                          'Brockville',
                                          'Kenmure',
-                                         'Concord')
-                         ).title()
+                                         'Concord')).title()
     town = fetch_input('Town/city: ',
                        SUBURB_TOWN_CITY_REGEX,
                        'Invalid town/city.\n' + suburb_town_error +
@@ -227,6 +226,9 @@ def get_pizza():
             else:
                 raise IndexError
 
+        except IndexError:
+            print(ERROR.format('Invalid range.'))
+
         # Must be "<finish>" because of regex
         except ValueError:
             if ordered_amount > 1:
@@ -234,8 +236,6 @@ def get_pizza():
             else:
                 print(ERROR.format('You must select at least one pizza.\n'
                                    'Or enter "<cancel>" to cancel order.'))
-        except IndexError:
-            print(ERROR.format('Invalid range.'))
 
     return pizzas_ordered
 
@@ -244,7 +244,7 @@ def print_receipt(name, pizzas_ordered, is_delivery, address, phone):
     """Self-explanatory."""
     total = 0
     total_fields = '{:<32}{:>25}{:>6.2f}'
-    # List of tuples to reference pizza named
+    # List of tuples to reference pizza names
     pizza_ref = list(PIZZA_LIST.items())
 
     customer_details = OrderedDict({'CUSTOMER NAME:': name})
