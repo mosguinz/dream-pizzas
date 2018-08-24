@@ -13,10 +13,12 @@ MAX_PIZZA = 5
 LINE = '-' * 63
 DOUBLE_LINE = '=' * 63
 EXAMPLES = '\n\nExamples:\n' + ' {}\n' * 3 + ' {}'
+ERROR = LINE + '\nERROR\n{}\n' + LINE
 
 # Regex for input validation
 ORDER_TYPE_REGEX = r'[d|p]{1}$'
-ORDER_CONFIRM = r'[y|n]{1}$'
+ORDER_CONFIRM_REGEX = r'[y|n]{1}$'
+PIZZA_MENU_REGEX = r'^([\d]+)|(<finish>)$'
 NAME_REGEX = r"[a-z -']+$"
 STREET_REGEX = r'^([a-z_-]+ )?\d+[a-z]? [\w _-]+$'
 SUBURB_TOWN_CITY_REGEX = r'([\d]+)?[a-z ]+$'
@@ -86,47 +88,27 @@ def fetch_input(prompt, regex, error_message):
 
     Return value that match regex.
 
-    [THIS FUNCTION IS VERY UGLY.]
+    [THIS FUNCTION IS SLIGHTLY UGLY.]
     """
-    # Keeps asking user for input. Break and return when input is valid.
+    # Keep asking user for input. Break and return when input is valid.
     while True:
         try:
             # Get input and strip trailing whitespaces
             user_input = input('\n' + prompt).lower().strip()
 
             if user_input == '':
-                print('Required field.')
+                print(ERROR.format('Required field.'))
             elif user_input == '<exit>':
                 sys.exit()
             elif user_input == '<cancel>':
                 confirm_order(False)
-
-            # If regex is provided (not None)
-            elif regex:
-                # Break if input satisfies regex
-                if re.match(regex, user_input):
-                    break
-                else:
-                    raise ValueError
-
-            # If regex is None; for pizza selection
+            elif re.match(regex, user_input):
+                break  # to return input
             else:
-                # Break if order is satisfied
-                if user_input == '<finish>':
-                    break
+                raise ValueError
 
-                # (Tries to) turn user_input into int
-                user_input = int(user_input)
-
-                # Break if input is in range of menu list
-                if user_input in range(1, MENU_SIZE + 1):
-                    user_input = user_input - 1
-                    break
-                else:
-                    raise IndexError
-
-        except (IndexError, ValueError):
-            print('{}\nERROR\n{}\n{}'.format(LINE, error_message, LINE))
+        except ValueError:
+            print(ERROR.format(error_message))
 
     return user_input
 
@@ -134,7 +116,7 @@ def fetch_input(prompt, regex, error_message):
 def print_menu(options):
     """Self-explanatory.
 
-    options (dict): pizza selection and price
+    options (OrderedDict): the menu and price
     """
     for index, option in enumerate(options, 1):
         print('{}.\t{:<32}{:>21}{:>6.2f}'.format(
@@ -147,6 +129,7 @@ def get_order_type():
                         'Enter "D" for delivery, or enter "P" for pick-up: ',
                         ORDER_TYPE_REGEX,
                         'Invalid order type.')
+
     return True if order == 'd' else False
 
 
@@ -156,6 +139,7 @@ def get_name():
                        NAME_REGEX,
                        'Invalid character in name.\n'
                        "Valid characters: A-Z ' - [space]").title()
+
     return name
 
 
@@ -195,6 +179,7 @@ def get_address():
                                            '9011',
                                            '8013',
                                            '1010'))
+
     return street, suburb, ' '.join((town, str(postcode)))
 
 
@@ -207,6 +192,7 @@ def get_phone():
                                         '07-123-1234',
                                         '021 123 1234',
                                         '(Spaces and hyphen optional.)'))
+
     return phone
 
 
@@ -219,26 +205,38 @@ def get_pizza():
 
     print('\nSelect a pizza from the menu below.\n'
           'An order may contain up to {} pizzas.\n'.format(MAX_PIZZA))
+
+    # Keep asking till limit is reached
     while ordered_amount < MAX_PIZZA + 1:
         print_menu(PIZZA_LIST)
-        pizza_num = fetch_input(prompt.format(ordered_amount, MAX_PIZZA,
-                                              MENU_SIZE),
-                                None,
-                                'Invalid pizza.')
+        try:
+            pizza_num = int(fetch_input(prompt.format(ordered_amount,
+                                                      MAX_PIZZA,
+                                                      MENU_SIZE),
+                                        PIZZA_MENU_REGEX,
+                                        'Invalid pizza number.'))
 
-        # Finish ordering and amount ordered < 5
-        if pizza_num == "<finish>":
-            if ordered_amount < 2:
-                print('\nYou must select at least one pizza.\n'
-                      'Or enter "<cancel>" to cancel order.\n')
+            # Add pizza to order if selection is valid
+            if pizza_num in range(1, MENU_SIZE + 1):
+                pizza_num -= 1
+                ordered_amount += 1
+                try:
+                    pizzas_ordered[pizza_num] += 1
+                except KeyError:
+                    pizzas_ordered[pizza_num] = 1
             else:
+                raise IndexError
+
+        # Must be "<finish>" because of regex
+        except ValueError:
+            if ordered_amount > 1:
                 break
-        else:
-            ordered_amount += 1
-            try:
-                pizzas_ordered[pizza_num] += 1
-            except KeyError:
-                pizzas_ordered[pizza_num] = 1
+            else:
+                print(ERROR.format('You must select at least one pizza.\n'
+                                   'Or enter "<cancel>" to cancel order.'))
+        except IndexError:
+            print(ERROR.format('Invalid range.'))
+
     return pizzas_ordered
 
 
@@ -246,7 +244,7 @@ def print_receipt(name, pizzas_ordered, is_delivery, address, phone):
     """Self-explanatory."""
     total = 0
     total_fields = '{:<32}{:>25}{:>6.2f}'
-    # List of tuples to reference pizza name
+    # List of tuples to reference pizza named
     pizza_ref = list(PIZZA_LIST.items())
 
     customer_details = OrderedDict({'CUSTOMER NAME:': name})
@@ -291,7 +289,7 @@ def print_receipt(name, pizzas_ordered, is_delivery, address, phone):
 
     # Confirm order
     confirm = fetch_input('Submit order? (Y/N) ',
-                          ORDER_CONFIRM,
+                          ORDER_CONFIRM_REGEX,
                           'Invalid input.\n'
                           'Enter "Y" to submit order, or "N" to cancel order.')
     if confirm == 'y':
@@ -301,7 +299,7 @@ def print_receipt(name, pizzas_ordered, is_delivery, address, phone):
 
 
 def start_order():
-    """Start order."""
+    """Initialize order."""
     is_delivery = get_order_type()
     name = get_name()
     if is_delivery:
