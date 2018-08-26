@@ -94,7 +94,7 @@ def fetch_input(prompt, regex, error_message):
     while True:
         try:
             # Get input and strip trailing whitespaces
-            user_input = input('\n' + prompt).lower().strip()
+            user_input = input('\n' + prompt + ': ').lower().strip()
 
             if user_input == '':
                 print(ERROR.format('Required field.'))
@@ -126,7 +126,7 @@ def print_menu(options):
 def get_order_type():
     """Self-explanatory."""
     order = fetch_input('Enter order type.\n'
-                        'Enter "D" for delivery, or enter "P" for pick-up: ',
+                        'Enter "D" for delivery, or enter "P" for pick-up',
                         ORDER_TYPE_REGEX,
                         'Invalid order type.')
 
@@ -135,7 +135,7 @@ def get_order_type():
 
 def get_name():
     """Self-explanatory."""
-    name = fetch_input('Enter customer name: ',
+    name = fetch_input('Enter customer name',
                        NAME_REGEX,
                        'Invalid character in name.\n'
                        "Valid characters: A-Z ' - [space]").title()
@@ -148,7 +148,7 @@ def get_address():
     suburb_town_error = 'Must contain at least a character.'
 
     street = fetch_input('Enter delivery address.\n'
-                         'Street address: ',
+                         'Street address',
                          STREET_REGEX,
                          'Invalid street address.\n'
                          'Must contain at least one digit and character.' +
@@ -156,21 +156,21 @@ def get_address():
                                          '434 George Street',
                                          '6A Hanover Street',
                                          '459 Princes Street')).title()
-    suburb = fetch_input('Suburb: ',
+    suburb = fetch_input('Suburb',
                          SUBURB_TOWN_CITY_REGEX,
                          'Invalid suburb.\n' + suburb_town_error +
                          EXAMPLES.format('Green Island',
                                          'Brockville',
                                          'Kenmure',
                                          'Concord')).title()
-    town = fetch_input('Town/city: ',
+    town = fetch_input('Town/city',
                        SUBURB_TOWN_CITY_REGEX,
                        'Invalid town/city.\n' + suburb_town_error +
                        EXAMPLES.format('Dunedin',
                                        'Ashburton',
                                        'Christchurch',
                                        'Auckland')).title()
-    postcode = fetch_input('Postcode: ',
+    postcode = fetch_input('Postcode',
                            POSTCODE_REGEX,
                            'Invalid postcode.\n'
                            'Postcode must be 4 digit numbers.' +
@@ -184,7 +184,7 @@ def get_address():
 
 def get_phone():
     """Self-explanatory."""
-    phone = fetch_input('Phone number: ',
+    phone = fetch_input('Phone number',
                         NUMBER_REGEX,
                         'Invalid phone number.' +
                         EXAMPLES.format('+64 7 123 1234',
@@ -198,7 +198,7 @@ def get_phone():
 def get_pizza():
     """Self-explanatory."""
     prompt = ('{} of {}\nEnter a number from 1 to {} to select a pizza.\n'
-              'Or enter "<finish>" to complete order: ')
+              'Or enter "<finish>" to complete order')
     pizzas_ordered = {}
     ordered_amount = 1
 
@@ -270,6 +270,7 @@ def print_receipt(name, pizzas_ordered, is_delivery, address, phone):
         amount = pizzas_ordered[pizza]
         cost = amount * pizza_ref[pizza][1]
         total += cost
+        # Shows amount of pizza ordered if more than one
         amount = '(x{})'.format(amount) if amount > 1 else ''
         print('{:<32}{:>17}{:>8}{:>6.2f}'.format(
             pizza_name, amount, '$', cost))
@@ -278,8 +279,7 @@ def print_receipt(name, pizzas_ordered, is_delivery, address, phone):
     if is_delivery:
         print()
         print(total_fields.format('Subtotal', '$', total))
-        print(total_fields.format(
-            'Delivery surcharge', '$', DELIVERY_CHARGE))
+        print(total_fields.format('Delivery surcharge', '$', DELIVERY_CHARGE))
         total += DELIVERY_CHARGE
 
     # Print total cost
@@ -288,7 +288,7 @@ def print_receipt(name, pizzas_ordered, is_delivery, address, phone):
     print(LINE)
 
     # Confirm order
-    confirm = fetch_input('Submit order? (Y/N) ',
+    confirm = fetch_input('Submit order? (Y/N)',
                           ORDER_CONFIRM_REGEX,
                           'Invalid input.\n'
                           'Enter "Y" to submit order, or "N" to cancel order.')
@@ -315,4 +315,4 @@ while True:
     try:
         start_order()
     except KeyboardInterrupt:
-        pass
+        print('Restarting console...')
