@@ -1,5 +1,4 @@
 """Dream Pizzas ordering console for phone operators."""
-# Write pizza as Class object?
 
 import re
 import sys
