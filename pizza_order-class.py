@@ -96,3 +96,19 @@ class Order:
                 print(ERROR.format(error_message))
 
             return user_input
+
+    def set_is_delivery(self):
+        order = self.fetch_input('Enter order type.\n'
+                                 'Enter "D" for delivery, or enter "P" for pick-up',
+                                 ORDER_TYPE_REGEX,
+                                 'Invalid order type.')
+
+        self.is_delivery = True if order == 'd' else False
+
+    def set_name(self):
+        name = self.fetch_input('Enter customer name',
+                                NAME_REGEX,
+                                'Invalid character in name.\n'
+                                "Valid characters: A-Z ' - [space]").title()
+
+        self.name = name
