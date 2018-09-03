@@ -95,7 +95,7 @@ class Order:
             except ValueError:
                 print(ERROR.format(error_message))
 
-            return user_input
+        return user_input
 
     def set_is_delivery(self):
         order = self.fetch_input('Enter order type.\n'
