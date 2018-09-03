@@ -112,3 +112,51 @@ class Order:
                                 "Valid characters: A-Z ' - [space]").title()
 
         self.name = name
+
+    def set_address(self):
+        suburb_town_error = 'Must contain at least a character.'
+
+        street = self.fetch_input('Enter delivery address.\n'
+                                  'Street address',
+                                  STREET_REGEX,
+                                  'Invalid street address.\n'
+                                  'Must contain at least one digit and character.' +
+                                  EXAMPLES.format('26 Elwyn Cresent',
+                                                  '434 George Street',
+                                                  '6A Hanover Street',
+                                                  '459 Princes Street')).title()
+        suburb = self.fetch_input('Suburb',
+                                  SUBURB_TOWN_CITY_REGEX,
+                                  'Invalid suburb.\n' + suburb_town_error +
+                                  EXAMPLES.format('Green Island',
+                                                  'Brockville',
+                                                  'Kenmure',
+                                                  'Concord')).title()
+        town = self.fetch_input('Town/city',
+                                SUBURB_TOWN_CITY_REGEX,
+                                'Invalid town/city.\n' + suburb_town_error +
+                                EXAMPLES.format('Dunedin',
+                                                'Ashburton',
+                                                'Christchurch',
+                                                'Auckland')).title()
+        postcode = self.fetch_input('Postcode',
+                                    POSTCODE_REGEX,
+                                    'Invalid postcode.\n'
+                                    'Postcode must be 4 digit numbers.' +
+                                    EXAMPLES.format('9018',
+                                                    '9011',
+                                                    '8013',
+                                                    '1010'))
+
+        self.address = street, suburb, ' '.join((town, str(postcode)))
+
+    def get_phone(self):
+        phone = self.fetch_input('Phone number',
+                                 NUMBER_REGEX,
+                                 'Invalid phone number.' +
+                                 EXAMPLES.format('+64 7 123 1234',
+                                                 '07-123-1234',
+                                                 '021 123 1234',
+                                                 '(Spaces and hyphen optional.)'))
+
+        self.phone = phone
