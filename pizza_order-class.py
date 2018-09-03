@@ -44,6 +44,25 @@ PIZZA_LIST = OrderedDict({'BBQ Italian Sausage': 8.50,
 MENU_SIZE = len(PIZZA_LIST)
 
 
+def confirm_order(confirm):
+    """Print end-of-order confirmation box."""
+    print('\n\n' + DOUBLE_LINE + '\n')
+    if confirm:
+        print('ORDER SUBMITTED')
+    else:
+        print('ORDER CANCELLED')
+    print('Press Enter key to continue.')
+    input('\n' + DOUBLE_LINE + '\n\n')
+    raise KeyboardInterrupt
+
+
+def print_menu(menu):
+    """Self-explanatory."""
+    for index, pizza in enumerate(menu, 1):
+        print('{}.\t{:<32}{:>21}{:>6.2f}'.format(
+            index, pizza, '$', menu[pizza]))
+
+
 class Order:
     """Hold order information."""
 
