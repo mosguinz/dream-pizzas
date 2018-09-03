@@ -57,22 +57,23 @@ class Order:
         self.cost = 0.00
 
     def fetch_input(self, prompt, regex, error_message):
-        try:
-            # Get input and strip trailing whitespaces
-            user_input = input('\n' + prompt + ': ').lower().strip()
+        while True:
+            try:
+                # Get input and strip trailing whitespaces
+                user_input = input('\n' + prompt + ': ').lower().strip()
 
-            if user_input == '':
-                print(ERROR.format('Required field.'))
-            elif user_input == '<exit>':
-                sys.exit()
-            elif user_input == '<cancel>':
-                confirm_order(False)
-            elif re.match(regex, user_input):
-                break  # to return input
-            else:
-                raise ValueError
+                if user_input == '':
+                    print(ERROR.format('Required field.'))
+                elif user_input == '<exit>':
+                    sys.exit()
+                elif user_input == '<cancel>':
+                    confirm_order(False)
+                elif re.match(regex, user_input):
+                    break  # to return input
+                else:
+                    raise ValueError
 
-        except ValueError:
-            print(ERROR.format(error_message))
+            except ValueError:
+                print(ERROR.format(error_message))
 
-        return user_input
+            return user_input
