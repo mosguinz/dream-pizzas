@@ -42,3 +42,37 @@ PIZZA_LIST = OrderedDict({'BBQ Italian Sausage': 8.50,
                           'Mega Meatlovers': 13.50,
                           })
 MENU_SIZE = len(PIZZA_LIST)
+
+
+class Order:
+    """Hold order information."""
+
+    def __init__(self):
+        """Default values for order."""
+        self.is_delivery = False
+        self.name = ''
+        self.address = None
+        self.phone = None
+        self.pizzas = {}
+        self.cost = 0.00
+
+    def fetch_input(self, prompt, regex, error_message):
+        try:
+            # Get input and strip trailing whitespaces
+            user_input = input('\n' + prompt + ': ').lower().strip()
+
+            if user_input == '':
+                print(ERROR.format('Required field.'))
+            elif user_input == '<exit>':
+                sys.exit()
+            elif user_input == '<cancel>':
+                confirm_order(False)
+            elif re.match(regex, user_input):
+                break  # to return input
+            else:
+                raise ValueError
+
+        except ValueError:
+            print(ERROR.format(error_message))
+
+        return user_input
