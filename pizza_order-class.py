@@ -69,10 +69,10 @@ class Order:
     def __init__(self):
         """Default values for order."""
         self.is_delivery = False
-        self.name = ''
+        self.customer_name = ''
         self.address = None
         self.phone = None
-        self.pizzas = {}
+        self.pizzas_ordered = {}
         self.cost = 0.00
 
     def fetch_input(self, prompt, regex, error_message):
@@ -111,7 +111,7 @@ class Order:
                                 'Invalid character in name.\n'
                                 "Valid characters: A-Z ' - [space]").title()
 
-        self.name = name
+        self.customer_name = name
 
     def set_address(self):
         suburb_town_error = 'Must contain at least a character.'
@@ -150,7 +150,7 @@ class Order:
 
         self.address = street, suburb, ' '.join((town, str(postcode)))
 
-    def get_phone(self):
+    def set_phone(self):
         phone = self.fetch_input('Phone number',
                                  NUMBER_REGEX,
                                  'Invalid phone number.' +
@@ -160,3 +160,46 @@ class Order:
                                                  '(Spaces and hyphen optional.)'))
 
         self.phone = phone
+
+    def set_pizza_order(self):
+        prompt = ('{} of {}\nEnter a number from 1 to {} to select a pizza.\n'
+                  'Or enter "<finish>" to complete order')
+        pizzas_ordered = {}
+        ordered_amount = 1
+
+        print('\nSelect a pizza from the menu below.\n'
+              'An order may contain up to {} pizzas.\n'.format(MAX_PIZZA))
+
+        # Keep asking till limit is reached
+        while ordered_amount < MAX_PIZZA + 1:
+            print_menu(PIZZA_LIST)
+            try:
+                pizza_num = int(self.fetch_input(prompt.format(ordered_amount,
+                                                               MAX_PIZZA,
+                                                               MENU_SIZE),
+                                                 PIZZA_MENU_REGEX,
+                                                 'Invalid pizza number.'))
+
+                # Add pizza to order if selection is valid
+                if pizza_num in range(1, MENU_SIZE + 1):
+                    pizza_num -= 1
+                    ordered_amount += 1
+                    try:
+                        pizzas_ordered[pizza_num] += 1
+                    except KeyError:
+                        pizzas_ordered[pizza_num] = 1
+                else:
+                    raise IndexError
+
+            except IndexError:
+                print(ERROR.format('Invalid range.'))
+
+            # Must be "<finish>" because of regex
+            except ValueError:
+                if ordered_amount > 1:
+                    break
+                else:
+                    print(ERROR.format('You must select at least one pizza.\n'
+                                       'Or enter "<cancel>" to cancel order.'))
+
+        self.pizzas_ordered = pizzas_ordered
