@@ -2,7 +2,7 @@
 
 import re
 import sys
-from collections import OrderedDict
+from collections import namedtuple
 
 # Order specifications
 DELIVERY_CHARGE = 3.00
@@ -28,19 +28,19 @@ NUMBER_REGEX = '|'.join('(?:{0})'.format(regex)
                         for regex in (MOBILE_REGEX, LANDLINE_REGEX))
 
 # Menu
-PIZZA_LIST = OrderedDict({'BBQ Italian Sausage': 8.50,
-                          'BBQ Pork and Onion': 8.50,
-                          'Beef and Onion': 8.50,
-                          'Ham and Cheese': 8.50,
-                          'Hawaiian': 8.50,
-                          'Pepperoni': 8.50,
-                          'Simply Cheese': 8.50,
-                          'Cheesy Chicken Chorizo and Bacon': 13.50,
-                          'Chicken and Camembert': 13.50,
-                          'Chicken Supreme': 13.50,
-                          'Loaded Supreme': 13.50,
-                          'Mega Meatlovers': 13.50,
-                          })
+Pizza = namedtuple('Pizza', ['name', 'price'])
+PIZZA_LIST = [Pizza(name='BBQ Italian Sausage', price=8.5),
+              Pizza(name='BBQ Pork and Onion', price=8.5),
+              Pizza(name='Beef and Onion', price=8.5),
+              Pizza(name='Ham and Cheese', price=8.5),
+              Pizza(name='Hawaiian', price=8.5),
+              Pizza(name='Pepperoni', price=8.5),
+              Pizza(name='Simply Cheese', price=8.5),
+              Pizza(name='Cheesy Chicken Chorizo and Bacon', price=13.5),
+              Pizza(name='Chicken and Camembert', price=13.5),
+              Pizza(name='Chicken Supreme', price=13.5),
+              Pizza(name='Loaded Supreme', price=13.5),
+              Pizza(name='Mega Meatlovers', price=13.5)]
 MENU_SIZE = len(PIZZA_LIST)
 
 
