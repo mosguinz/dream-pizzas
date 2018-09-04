@@ -29,18 +29,18 @@ NUMBER_REGEX = '|'.join('(?:{0})'.format(regex)
 
 # Menu
 Pizza = namedtuple('Pizza', ['name', 'price'])
-PIZZA_LIST = [Pizza(name='BBQ Italian Sausage', price=8.5),
-              Pizza(name='BBQ Pork and Onion', price=8.5),
-              Pizza(name='Beef and Onion', price=8.5),
-              Pizza(name='Ham and Cheese', price=8.5),
-              Pizza(name='Hawaiian', price=8.5),
-              Pizza(name='Pepperoni', price=8.5),
-              Pizza(name='Simply Cheese', price=8.5),
-              Pizza(name='Cheesy Chicken Chorizo and Bacon', price=13.5),
-              Pizza(name='Chicken and Camembert', price=13.5),
-              Pizza(name='Chicken Supreme', price=13.5),
-              Pizza(name='Loaded Supreme', price=13.5),
-              Pizza(name='Mega Meatlovers', price=13.5)]
+PIZZA_LIST = [Pizza('BBQ Italian Sausage', 8.5),
+              Pizza('BBQ Pork and Onion', 8.5),
+              Pizza('Beef and Onion', 8.5),
+              Pizza('Ham and Cheese', 8.5),
+              Pizza('Hawaiian', 8.5),
+              Pizza('Pepperoni', 8.5),
+              Pizza('Simply Cheese', 8.5),
+              Pizza('Cheesy Chicken Chorizo and Bacon', 13.5),
+              Pizza('Chicken and Camembert', 13.5),
+              Pizza('Chicken Supreme', 13.5),
+              Pizza('Loaded Supreme', 13.5),
+              Pizza('Mega Meatlovers', 13.5)]
 MENU_SIZE = len(PIZZA_LIST)
 
 
@@ -60,7 +60,7 @@ def print_menu(menu):
     """Self-explanatory."""
     for index, pizza in enumerate(menu, 1):
         print('{}.\t{:<32}{:>21}{:>6.2f}'.format(
-            index, pizza, '$', menu[pizza]))
+            index, pizza.name, '$', pizza.price))
 
 
 class Order:
