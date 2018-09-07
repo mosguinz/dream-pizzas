@@ -162,7 +162,8 @@ class Order:
         self.phone = phone
 
     def set_pizza_order(self):
-        prompt = ('{} of {}\nEnter a number from 1 to {} to select a pizza.\n'
+        prompt = ('{} of {}\n'
+                  'Enter a number from 1 to {} to select a pizza.\n'
                   'Or enter "<finish>" to complete order')
         pizzas_ordered = {}
         ordered_amount = 1
@@ -185,9 +186,9 @@ class Order:
                     pizza_num -= 1
                     ordered_amount += 1
                     try:
-                        pizzas_ordered[pizza_num] += 1
+                        pizzas_ordered[PIZZA_LIST[pizza_num]] += 1
                     except KeyError:
-                        pizzas_ordered[pizza_num] = 1
+                        pizzas_ordered[PIZZA_LIST[pizza_num]] = 1
                 else:
                     raise IndexError
 
@@ -203,3 +204,4 @@ class Order:
                                        'Or enter "<cancel>" to cancel order.'))
 
         self.pizzas_ordered = pizzas_ordered
+
