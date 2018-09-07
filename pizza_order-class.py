@@ -212,7 +212,8 @@ class Order:
         self.pizza_ordered is not blank.
         """
         for pizza in self.pizzas_ordered:
-            self.cost += pizza.price
+            self.cost += pizza.price * self.pizzas_ordered[pizza]
 
         if self.is_delivery:
             self.cost += DELIVERY_CHARGE
+
