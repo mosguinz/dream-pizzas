@@ -205,3 +205,14 @@ class Order:
 
         self.pizzas_ordered = pizzas_ordered
 
+    def get_cost(self):
+        """Get the total cost for the order.
+
+        Assumes self.is_delivery is assigned and
+        self.pizza_ordered is not blank.
+        """
+        for pizza in self.pizzas_ordered:
+            self.cost += pizza.price
+
+        if self.is_delivery:
+            self.cost += DELIVERY_CHARGE
