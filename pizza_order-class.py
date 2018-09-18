@@ -19,7 +19,7 @@ ORDER_TYPE_REGEX = r'[d|p]{1}$'
 ORDER_CONFIRM_REGEX = r'[y|n]{1}$'
 PIZZA_MENU_REGEX = r'^([\d]+)|(<finish>)$'
 NAME_REGEX = r"[a-z -']+$"
-STREET_REGEX = r'^([a-z_-]+ )?\d+[a-z]? [\w _-]+$'
+STREET_REGEX = r'^([a-z_-]+ )\?d+[a-z]? [\w _-]+$'
 SUBURB_TOWN_CITY_REGEX = r'([\d]+)?[a-z ]+$'
 POSTCODE_REGEX = r'\d{4}$'
 MOBILE_REGEX = r'^(0|(\+64(\s|-)?)){1}(\d){2}(\s|-)?\d{3}(\s|-)?\d{4}$'
@@ -59,7 +59,7 @@ def confirm_order(confirm):
 def print_menu(menu):
     """Self-explanatory."""
     for index, pizza in enumerate(menu, 1):
-        print('{}.\t{:<32}{:>21}{:>6.2f}'.format(
+        print('{:>2}. {:<32}{:>21}{:>6.2f}'.format(
             index, pizza.name, '$', pizza.price))
 
 
@@ -216,4 +216,3 @@ class Order:
 
         if self.is_delivery:
             self.cost += DELIVERY_CHARGE
-
