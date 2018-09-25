@@ -66,16 +66,8 @@ def print_menu(menu):
 class Order:
     """Hold order information."""
 
-    def __init__(self):
-        """Default values for order."""
-        self.is_delivery = False
-        self.customer_name = ''
-        self.address = None
-        self.phone = None
-        self.pizzas_ordered = {}
-        self.cost = 0.00
-
     def fetch_input(self, prompt, regex, error_message):
+        """Get and evaluate user input."""
         while True:
             try:
                 # Get input and strip trailing whitespaces
@@ -97,23 +89,43 @@ class Order:
 
         return user_input
 
-    def set_is_delivery(self):
+    @property
+    def is_delivery(self):
+        """bool: Whether order is a delivery"""
+        return self._is_delivery
+
+    @is_delivery.setter
+    def is_delivery(self):
         order = self.fetch_input('Enter order type.\n'
                                  'Enter "D" for delivery, or enter "P" for pick-up',
                                  ORDER_TYPE_REGEX,
                                  'Invalid order type.')
 
-        self.is_delivery = True if order == 'd' else False
+        self._is_delivery = True if order == 'd' else False
 
-    def set_name(self):
+    @property
+    def customer_name(self):
+        """str: Customer name"""
+        return self._customer_name
+
+    @customer_name.setter
+    def customer_name(self):
         name = self.fetch_input('Enter customer name',
                                 NAME_REGEX,
                                 'Invalid character in name.\n'
                                 "Valid characters: A-Z ' - [space]").title()
 
-        self.customer_name = name
+        self._customer_name = name
 
-    def set_address(self):
+    @property
+    def address(self):
+        """Address (namedtuple): Order delivery address."""
+        return self._address
+
+    @address.setter
+    def address(self):
+        Address = namedtuple(
+            'Address', ['street', 'suburb', 'town', 'postcode'])
         suburb_town_error = 'Must contain at least a character.'
 
         street = self.fetch_input('Enter delivery address.\n'
@@ -148,9 +160,15 @@ class Order:
                                                     '8013',
                                                     '1010'))
 
-        self.address = street, suburb, ' '.join((town, str(postcode)))
+        self._address = Address(street, suburb, town, postcode)
 
-    def set_phone(self):
+    @property
+    def phone(self):
+        """str: Customer phone number."""
+        return self._phone
+
+    @phone.setter
+    def phone(self):
         phone = self.fetch_input('Phone number',
                                  NUMBER_REGEX,
                                  'Invalid phone number.' +
@@ -159,13 +177,23 @@ class Order:
                                                  '021 123 1234',
                                                  '(Spaces and hyphen optional.)'))
 
-        self.phone = phone
+        self._phone = phone
 
-    def set_pizza_order(self):
+    @property
+    def pizza_order(self):
+        """dict: Customer order.
+
+        key: Pizza number
+        value: Amount of pizza
+        """
+        return self._pizza_order
+
+    @pizza_order.setter
+    def pizza_order(self):
         prompt = ('{} of {}\n'
                   'Enter a number from 1 to {} to select a pizza.\n'
                   'Or enter "<finish>" to complete order')
-        pizzas_ordered = {}
+        pizza_order = {}
         ordered_amount = 1
 
         print('\nSelect a pizza from the menu below.\n'
@@ -186,9 +214,9 @@ class Order:
                     pizza_num -= 1
                     ordered_amount += 1
                     try:
-                        pizzas_ordered[PIZZA_LIST[pizza_num]] += 1
+                        pizza_order[PIZZA_LIST[pizza_num]] += 1
                     except KeyError:
-                        pizzas_ordered[PIZZA_LIST[pizza_num]] = 1
+                        pizza_order[PIZZA_LIST[pizza_num]] = 1
                 else:
                     raise IndexError
 
@@ -203,16 +231,17 @@ class Order:
                     print(ERROR.format('You must select at least one pizza.\n'
                                        'Or enter "<cancel>" to cancel order.'))
 
-        self.pizzas_ordered = pizzas_ordered
+        self._pizza_order = pizza_order
 
-    def get_cost(self):
-        """Get the total cost for the order.
+    @property
+    def total(self):
+        """float: Total order total."""
+        return self._total
 
-        Assumes self.is_delivery is assigned and
-        self.pizza_ordered is not blank.
-        """
+    @total.setter
+    def total(self):
         for pizza in self.pizzas_ordered:
-            self.cost += pizza.price * self.pizzas_ordered[pizza]
+            self._total += pizza.price * self.pizzas_ordered[pizza]
 
         if self.is_delivery:
-            self.cost += DELIVERY_CHARGE
+            self._total += DELIVERY_CHARGE

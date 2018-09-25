@@ -282,6 +282,7 @@ def print_receipt(name, pizzas_ordered, is_delivery, address, phone):
         total += DELIVERY_CHARGE
 
     # Print total cost
+
     print(LINE)
     print(total_fields.format('Total', '$', total))
     print(LINE)
