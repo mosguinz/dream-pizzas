@@ -193,7 +193,7 @@ class Order:
         return self._pizzas_ordered
 
     @pizzas_ordered.setter
-    def pizzas_ordered(self):
+    def pizzas_ordered(self, _):
         prompt = ('{} of {}\n'
                   'Enter a number from 1 to {} to select a pizza.\n'
                   'Or enter "<finish>" to complete order')
@@ -202,38 +202,42 @@ class Order:
 
         print('\nSelect a pizza from the menu below.\n'
               'An order may contain up to {} pizzas.\n'.format(MAX_ORDER_SIZE))
-
         # Keep asking till limit is reached
         while ordered_amount < MAX_ORDER_SIZE + 1:
             print_menu(PIZZA_LIST)
             try:
-                pizza_num = int(self.fetch_input(prompt.format(ordered_amount,
-                                                               MAX_ORDER_SIZE,
-                                                               MENU_SIZE),
-                                                 PIZZA_MENU_REGEX,
-                                                 'Invalid pizza number.'))
+                option_number = int(self.fetch_input(prompt.format(ordered_amount,
+                                                                   MAX_ORDER_SIZE,
+                                                                   MENU_SIZE),
+                                                     PIZZA_MENU_REGEX,
+                                                     'Invalid pizza number.'))
+                print(LINE + '\n')
 
-                # Add pizza to order if selection is valid
-                if pizza_num in range(1, MENU_SIZE + 1):
-                    pizza_num -= 1
+                # Check if given option number is valid
+                if option_number in range(1, MENU_SIZE + 1):
+                    # Decrement number by one for accessing index
+                    option_number -= 1
                     ordered_amount += 1
                     try:
-                        pizzas_ordered[PIZZA_LIST[pizza_num]] += 1
+                        # Increment the amount ordered
+                        pizzas_ordered[option_number] += 1
                     except KeyError:
-                        pizzas_ordered[PIZZA_LIST[pizza_num]] = 1
+                        # Or, create new key with order number
+                        pizzas_ordered[option_number] = 1
                 else:
-                    raise IndexError
+                    raise IndexError('Invalid range.')
 
-            except IndexError:
-                print(ERROR.format('Invalid range.'))
+            except IndexError as e:
+                print(ERROR.format(e))
 
-            # Must be "<finish>" because of regex
+            # Order is finished (cancel before reaching MAX_ORDER_SIZE)
+            # Will fail to parse as base 10, so it must be "<finish>"
             except ValueError:
-                if ordered_amount > 1:
-                    break
-                else:
+                if ordered_amount == 1:
                     print(ERROR.format('You must select at least one pizza.\n'
                                        'Or enter "<cancel>" to cancel order.'))
+                else:
+                    break
 
         self._pizzas_ordered = pizzas_ordered
 
