@@ -2,6 +2,7 @@
 
 import re
 import sys
+from textwrap import dedent
 from collections import namedtuple
 
 # Order specifications
@@ -215,15 +216,15 @@ class Order:
 
                 # Check if given option number is valid
                 if option_number in range(1, MENU_SIZE + 1):
-                    # Decrement number by one for accessing index
+                    # Decrement number by one to access index of PIZZA_LIST
                     option_number -= 1
                     ordered_amount += 1
                     try:
                         # Increment the amount ordered
-                        pizzas_ordered[option_number] += 1
+                        pizzas_ordered[PIZZA_LIST[option_number]] += 1
                     except KeyError:
                         # Or, create new key with order number
-                        pizzas_ordered[option_number] = 1
+                        pizzas_ordered[PIZZA_LIST[option_number]] = 1
                 else:
                     raise IndexError('Invalid range.')
 
