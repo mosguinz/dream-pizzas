@@ -6,7 +6,7 @@ from collections import namedtuple
 
 # Order specifications
 DELIVERY_CHARGE = 3.00
-MAX_PIZZA = 5
+MAX_ORDER_SIZE = 5
 
 # String templates
 LINE = '-' * 63
@@ -66,6 +66,14 @@ def print_menu(menu):
 class Order:
     """Hold order information."""
 
+    def __init__(self):
+        self.is_delivery = None
+        self.customer_name = None
+        if self.is_delivery:
+            self.address = None
+            self.phone = None
+        self.pizzas_ordered = None
+
     def fetch_input(self, prompt, regex, error_message):
         """Get and evaluate user input."""
         while True:
@@ -91,17 +99,16 @@ class Order:
 
     @property
     def is_delivery(self):
-        """bool: Whether order is a delivery"""
+        """bool: Whether order is a delivery."""
         return self._is_delivery
 
     @is_delivery.setter
-    def is_delivery(self):
-        order = self.fetch_input('Enter order type.\n'
+    def is_delivery(self, _):
+        value = self.fetch_input('Enter order type.\n'
                                  'Enter "D" for delivery, or enter "P" for pick-up',
                                  ORDER_TYPE_REGEX,
                                  'Invalid order type.')
-
-        self._is_delivery = True if order == 'd' else False
+        self._is_delivery = True if value == 'd' else False
 
     @property
     def customer_name(self):
@@ -109,13 +116,12 @@ class Order:
         return self._customer_name
 
     @customer_name.setter
-    def customer_name(self):
-        name = self.fetch_input('Enter customer name',
-                                NAME_REGEX,
-                                'Invalid character in name.\n'
-                                "Valid characters: A-Z ' - [space]").title()
-
-        self._customer_name = name
+    def customer_name(self, _):
+        value = self.fetch_input('Enter customer name',
+                                 NAME_REGEX,
+                                 'Invalid character in name.\n'
+                                 "Valid characters: A-Z ' - [space]").title()
+        self._customer_name = value
 
     @property
     def address(self):
@@ -123,11 +129,7 @@ class Order:
         return self._address
 
     @address.setter
-    def address(self):
-        Address = namedtuple(
-            'Address', ['street', 'suburb', 'town', 'postcode'])
-        suburb_town_error = 'Must contain at least a character.'
-
+    def address(self, _):
         street = self.fetch_input('Enter delivery address.\n'
                                   'Street address',
                                   STREET_REGEX,
@@ -139,14 +141,16 @@ class Order:
                                                   '459 Princes Street')).title()
         suburb = self.fetch_input('Suburb',
                                   SUBURB_TOWN_CITY_REGEX,
-                                  'Invalid suburb.\n' + suburb_town_error +
+                                  'Invalid suburb.\n'
+                                  'Must contain at least a character.' +
                                   EXAMPLES.format('Green Island',
                                                   'Brockville',
                                                   'Kenmure',
                                                   'Concord')).title()
         town = self.fetch_input('Town/city',
                                 SUBURB_TOWN_CITY_REGEX,
-                                'Invalid town/city.\n' + suburb_town_error +
+                                'Invalid town/city.\n'
+                                'Must contain at least a character.' +
                                 EXAMPLES.format('Dunedin',
                                                 'Ashburton',
                                                 'Christchurch',
@@ -154,12 +158,14 @@ class Order:
         postcode = self.fetch_input('Postcode',
                                     POSTCODE_REGEX,
                                     'Invalid postcode.\n'
-                                    'Postcode must be 4 digit numbers.' +
+                                    'Postcode must be a four digit value.' +
                                     EXAMPLES.format('9018',
                                                     '9011',
                                                     '8013',
                                                     '1010'))
 
+        Address = namedtuple(
+            'Address', ['street', 'suburb', 'town', 'postcode'])
         self._address = Address(street, suburb, town, postcode)
 
     @property
@@ -168,21 +174,19 @@ class Order:
         return self._phone
 
     @phone.setter
-    def phone(self):
-        phone = self.fetch_input('Phone number',
+    def phone(self, _):
+        value = self.fetch_input('Phone number',
                                  NUMBER_REGEX,
                                  'Invalid phone number.' +
                                  EXAMPLES.format('+64 7 123 1234',
                                                  '07-123-1234',
                                                  '021 123 1234',
                                                  '(Spaces and hyphen optional.)'))
-
-        self._phone = phone
+        self._phone = value
 
     @property
     def pizza_order(self):
         """dict: Customer order.
-
         key: Pizza number
         value: Amount of pizza
         """
@@ -197,14 +201,14 @@ class Order:
         ordered_amount = 1
 
         print('\nSelect a pizza from the menu below.\n'
-              'An order may contain up to {} pizzas.\n'.format(MAX_PIZZA))
+              'An order may contain up to {} pizzas.\n'.format(MAX_ORDER_SIZE))
 
         # Keep asking till limit is reached
-        while ordered_amount < MAX_PIZZA + 1:
+        while ordered_amount < MAX_ORDER_SIZE + 1:
             print_menu(PIZZA_LIST)
             try:
                 pizza_num = int(self.fetch_input(prompt.format(ordered_amount,
-                                                               MAX_PIZZA,
+                                                               MAX_ORDER_SIZE,
                                                                MENU_SIZE),
                                                  PIZZA_MENU_REGEX,
                                                  'Invalid pizza number.'))
