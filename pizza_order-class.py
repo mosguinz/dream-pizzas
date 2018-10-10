@@ -185,19 +185,19 @@ class Order:
         self._phone = value
 
     @property
-    def pizza_order(self):
+    def pizzas_ordered(self):
         """dict: Customer order.
         key: Pizza number
         value: Amount of pizza
         """
-        return self._pizza_order
+        return self._pizzas_ordered
 
-    @pizza_order.setter
-    def pizza_order(self):
+    @pizzas_ordered.setter
+    def pizzas_ordered(self):
         prompt = ('{} of {}\n'
                   'Enter a number from 1 to {} to select a pizza.\n'
                   'Or enter "<finish>" to complete order')
-        pizza_order = {}
+        pizzas_ordered = {}
         ordered_amount = 1
 
         print('\nSelect a pizza from the menu below.\n'
@@ -218,9 +218,9 @@ class Order:
                     pizza_num -= 1
                     ordered_amount += 1
                     try:
-                        pizza_order[PIZZA_LIST[pizza_num]] += 1
+                        pizzas_ordered[PIZZA_LIST[pizza_num]] += 1
                     except KeyError:
-                        pizza_order[PIZZA_LIST[pizza_num]] = 1
+                        pizzas_ordered[PIZZA_LIST[pizza_num]] = 1
                 else:
                     raise IndexError
 
@@ -235,7 +235,7 @@ class Order:
                     print(ERROR.format('You must select at least one pizza.\n'
                                        'Or enter "<cancel>" to cancel order.'))
 
-        self._pizza_order = pizza_order
+        self._pizzas_ordered = pizzas_ordered
 
     @property
     def total(self):
