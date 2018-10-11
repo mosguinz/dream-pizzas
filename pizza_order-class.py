@@ -84,7 +84,7 @@ class Order:
                 user_input = input('\n' + prompt + ': ').lower().strip()
 
                 if user_input == '':
-                    print(ERROR.format('Required field.'))
+                    raise ValueError('Required field.')
                 elif user_input == '<exit>':
                     sys.exit()
                 elif user_input == '<cancel>':
@@ -92,10 +92,10 @@ class Order:
                 elif re.match(regex, user_input):
                     break  # to return input
                 else:
-                    raise ValueError
+                    raise ValueError(error_message)
 
-            except ValueError:
-                print(ERROR.format(error_message))
+            except ValueError as e:
+                print(ERROR.format(e))
 
         return user_input
 
