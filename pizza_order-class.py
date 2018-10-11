@@ -75,15 +75,6 @@ Press Enter key to continue.
     input()
 
 
-def confirm_order(confirm):
-    """Print end-of-order confirmation box."""
-    print('\n\n' + DOUBLE_LINE + '\n')
-    print('ORDER SUBMITTED') if confirm else print('ORDER CANCELLED')
-    print('Press Enter key to continue.')
-    input('\n' + DOUBLE_LINE + '\n\n')
-    raise KeyboardInterrupt('Restarting console...\n')
-
-
 def print_menu(menu):
     """Print menu."""
     for index, pizza in enumerate(menu, 1):
@@ -144,7 +135,7 @@ class Order:
                 elif user_input == '<exit>':
                     sys.exit()
                 elif user_input == '<cancel>':
-                    confirm_order(False)
+                    self.confirm(False)
                 elif re.match(regex, user_input):
                     break  # to return input.
                 else:
@@ -154,6 +145,40 @@ class Order:
                 print(ERROR.format(e))
 
         return user_input
+
+    def confirm(self, submit=None):
+        """Confirm the order.
+
+        Prompts for an input if a (bool) value is not provided for submit.
+        Informs user whether order has been submitted or cancelled,
+        corresponding to the given value of submit or input.
+
+        Args
+        ----
+            submit (bool, optional): True if order is confirmed, False
+                otherwise. Defaults to None.
+
+        Returns
+        -------
+            None.
+
+        Raises
+        ------
+            KeyboardInterrupt: Raises regardless to escape loop.
+
+        """
+        if submit is None:
+            submit = self.fetch_input('Submit order? (Y/N)',
+                                      ORDER_CONFIRM_REGEX,
+                                      'Invalid input.\n'
+                                      'Enter "Y" to submit order, or "N" to cancel order.')
+            submit = True if submit == 'y' else False
+
+        print('\n\n' + DOUBLE_LINE + '\n')
+        print('ORDER SUBMITTED') if submit else print('ORDER CANCELLED')
+        print('Press Enter key to continue.')
+        input('\n' + DOUBLE_LINE + '\n\n')
+        raise KeyboardInterrupt('Restarting console...')
 
     @property
     def is_delivery(self):
@@ -397,7 +422,7 @@ class Order:
         # Order total.
         order_total = total_fields.format('Total', self.total)
 
-        receipt = '\n'.join(['ORDER CONFIRMATION',
+        receipt = '\n'.join(['\nORDER CONFIRMATION',
                              DOUBLE_LINE,
                              customer_details,
                              DOUBLE_LINE + '\n',
@@ -407,7 +432,16 @@ class Order:
                              order_subtotal,
                              LINE,
                              order_total,
-                             DOUBLE_LINE
-                             ])
+                             DOUBLE_LINE])
 
         return receipt
+
+
+while True:
+    print_splash()
+    try:
+        order = Order()
+        print(order)
+        order.confirm()
+    except KeyboardInterrupt as e:
+        print(e)
