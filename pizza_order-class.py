@@ -2,7 +2,7 @@
 
 import re
 import sys
-from textwrap import dedent, wrap
+from textwrap import dedent
 from collections import namedtuple
 
 # Order specifications.
