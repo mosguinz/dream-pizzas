@@ -2,7 +2,7 @@
 
 import re
 import sys
-from textwrap import dedent
+from textwrap import dedent, wrap
 from collections import namedtuple
 
 # Order specifications.
@@ -104,6 +104,9 @@ class Order:
         Takes user input and check against given regex. Prints given error
         message when input does not satisfy regex.
 
+        Also trims input to fit be 37 characters or less so it doesn't break
+        text wrapping.
+
         Args
         ----
             prompt (str): Message to display to prompt user input.
@@ -143,6 +146,10 @@ class Order:
 
             except ValueError as e:
                 print(ERROR.format(e))
+
+        # Replace last 3 characters with elipsis if input is too long.
+        if len(user_input) > 37:
+            user_input = user_input[:34] + '...'
 
         return user_input
 
