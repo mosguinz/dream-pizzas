@@ -28,7 +28,8 @@ LANDLINE_REGEX = r'^(0|(\+64(\s|-)?)){1}\d{1}(\s|-)?\d{3}(\s|-)?\d{4}$'
 NUMBER_REGEX = '|'.join('(?:{0})'.format(regex)
                         for regex in (MOBILE_REGEX, LANDLINE_REGEX))
 
-# Instance of the namedtuple object. Attributes are properties of the pizza.
+# Pizza is an instance of a namedtuple object.
+# The attributes of the object are the properties of the pizza.
 #
 # Attributes
 # ----------
@@ -266,8 +267,7 @@ class Order:
                                                     '8013',
                                                     '1010'))
 
-        Address = namedtuple(
-            'Address', ['street', 'suburb', 'town', 'postcode'])
+        Address = namedtuple('Address', ['street', 'suburb', 'town', 'postcode'])
         self._address = Address(street, suburb, town, postcode)
 
     @property
@@ -376,7 +376,7 @@ class Order:
 
     @property
     def total(self):
-        """float: Order total cost."""
+        """float: Total order cost."""
         return self._total
 
     @total.setter
