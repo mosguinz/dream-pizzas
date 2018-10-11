@@ -54,13 +54,34 @@ PIZZA_LIST = [Pizza('BBQ Italian Sausage', 8.5),
 MENU_SIZE = len(PIZZA_LIST)
 
 
+def print_splash():
+    """Print a beautifully made splash screen :)."""
+    print(DOUBLE_LINE)
+    print('''
+                         ____
+    DREAM PIZZAS        / . .\\
+     PHONE OPERATOR     \  ---<
+     ORDERING CONSOLE    \  /
+   ______________________/ /
+-=:_______________________/
+
+Enter "<cancel>" at anytime to cancel the current order.
+Enter "<exit>" at anytime to kill this console.
+Review order details at the end before submitting orders.
+
+Press Enter key to continue.
+''')
+    print(DOUBLE_LINE)
+    input()
+
+
 def confirm_order(confirm):
     """Print end-of-order confirmation box."""
     print('\n\n' + DOUBLE_LINE + '\n')
     print('ORDER SUBMITTED') if confirm else print('ORDER CANCELLED')
     print('Press Enter key to continue.')
     input('\n' + DOUBLE_LINE + '\n\n')
-    raise KeyboardInterrupt
+    raise KeyboardInterrupt('Restarting console...\n')
 
 
 def print_menu(menu):
@@ -252,6 +273,7 @@ class Order:
             # Display menu.
             print()
             print_menu(PIZZA_LIST)
+
             try:
                 print(dedent("""
                              Select a pizza from the menu above.
@@ -260,13 +282,13 @@ class Order:
                              Or enter "<finish>" to complete order."""
                              .format(MAX_ORDER_SIZE, MENU_SIZE)))
 
+                # Get input
                 option_number = int(self.fetch_input(
                     'Pizza {} of {}'.format(ordered_amount, MAX_ORDER_SIZE),
                     PIZZA_MENU_REGEX, 'Invalid pizza number.'))
 
                 # Check if given option number is valid.
                 if option_number in range(1, MENU_SIZE + 1):
-
                     # Decrement number by one to access index of PIZZA_LIST.
                     option_number -= 1
                     ordered_amount += 1
