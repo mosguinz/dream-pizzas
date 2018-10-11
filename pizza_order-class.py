@@ -18,7 +18,7 @@ ERROR = LINE + '\nERROR\n{}\n' + LINE
 # Regex for input validation.
 ORDER_TYPE_REGEX = r'[d|p]{1}$'
 ORDER_CONFIRM_REGEX = r'[y|n]{1}$'
-PIZZA_MENU_REGEX = r'^([\d]+)|(<finish>)$'
+PIZZA_MENU_REGEX = r'^([\d]+)|(--f)$'
 NAME_REGEX = r"[a-z -']+$"
 STREET_REGEX = r'^([a-z_-]+ )?\d+[a-z]? [\w _-]+$'
 SUBURB_TOWN_CITY_REGEX = r'([\d]+)?[a-z ]+$'
@@ -65,8 +65,8 @@ def print_splash():
    ______________________/ /
 -=:_______________________/
 
-Enter "<cancel>" at anytime to cancel the current order.
-Enter "<exit>" at anytime to kill this console.
+Enter "--c" at anytime to cancel the current order.
+Enter "--e" at anytime to kill this console.
 Review order details at the end before submitting orders.
 
 Press Enter key to continue.
@@ -121,8 +121,8 @@ class Order:
             ValueError: If the given input is blank or does not matches regex.
                 Handled within the function to print the given error message
                 and ask user for input again.
-            SystemExit: If the given input matches the special command
-                "<exit>". Simply exits the command.
+            SystemExit: If the given input matches the special command "--e".
+                Simply exits the console.
 
         """
         while True:
@@ -132,9 +132,9 @@ class Order:
 
                 if user_input == '':
                     raise ValueError('Required field.')
-                elif user_input == '<exit>':
+                elif user_input == '--e':
                     sys.exit()
-                elif user_input == '<cancel>':
+                elif user_input == '--c':
                     self.confirm(False)
                 elif re.match(regex, user_input):
                     break  # to return input.
@@ -304,7 +304,7 @@ class Order:
                              Select a pizza from the menu above.
                              An order may contain up to {} pizzas.
                              Enter a number from 1 to {} to select a pizza.
-                             Or enter "<finish>" to complete order."""
+                             Or enter "--f" to complete order."""
                              .format(MAX_ORDER_SIZE, MENU_SIZE)))
 
                 # Get input
@@ -335,11 +335,11 @@ class Order:
                 print(ERROR.format(e))
 
             # Order is finished (cancel before reaching MAX_ORDER_SIZE).
-            # Will fail to parse as base 10, so it must be "<finish>".
+            # Will fail to parse as base 10, so it must be "--f".
             except ValueError:
                 if ordered_amount == 1:
                     print(ERROR.format('You must select at least one pizza.\n'
-                                       'Or enter "<cancel>" to cancel order.'))
+                                       'Or enter "--c" to cancel order.'))
                 else:
                     break
 
