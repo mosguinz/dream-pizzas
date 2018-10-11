@@ -5,17 +5,17 @@ import sys
 from textwrap import dedent
 from collections import namedtuple
 
-# Order specifications
+# Order specifications.
 DELIVERY_CHARGE = 3.00
 MAX_ORDER_SIZE = 5
 
-# String templates
+# String templates.
 LINE = '-' * 63
 DOUBLE_LINE = '=' * 63
 EXAMPLES = '\n\nExamples:\n' + ' {}\n' * 3 + ' {}'
 ERROR = LINE + '\nERROR\n{}\n' + LINE
 
-# Regex for input validation
+# Regex for input validation.
 ORDER_TYPE_REGEX = r'[d|p]{1}$'
 ORDER_CONFIRM_REGEX = r'[y|n]{1}$'
 PIZZA_MENU_REGEX = r'^([\d]+)|(<finish>)$'
@@ -28,8 +28,15 @@ LANDLINE_REGEX = r'^(0|(\+64(\s|-)?)){1}\d{1}(\s|-)?\d{3}(\s|-)?\d{4}$'
 NUMBER_REGEX = '|'.join('(?:{0})'.format(regex)
                         for regex in (MOBILE_REGEX, LANDLINE_REGEX))
 
-# Menu
+# Instance of the namedtuple object. Attributes are properties of the pizza.
+#
+# Attributes
+# ----------
+#     name (str): Name of the pizza.
+#     price (float): Price of the pizza.
 Pizza = namedtuple('Pizza', ['name', 'price'])
+
+# List of Pizza: Pizzas available for order; the menu.
 PIZZA_LIST = [Pizza('BBQ Italian Sausage', 8.5),
               Pizza('BBQ Pork and Onion', 8.5),
               Pizza('Beef and Onion', 8.5),
@@ -42,32 +49,35 @@ PIZZA_LIST = [Pizza('BBQ Italian Sausage', 8.5),
               Pizza('Chicken Supreme', 13.5),
               Pizza('Loaded Supreme', 13.5),
               Pizza('Mega Meatlovers', 13.5)]
+
+# int: Number of pizzas available for order.
 MENU_SIZE = len(PIZZA_LIST)
 
 
 def confirm_order(confirm):
     """Print end-of-order confirmation box."""
     print('\n\n' + DOUBLE_LINE + '\n')
-    if confirm:
-        print('ORDER SUBMITTED')
-    else:
-        print('ORDER CANCELLED')
+    print('ORDER SUBMITTED') if confirm else print('ORDER CANCELLED')
     print('Press Enter key to continue.')
     input('\n' + DOUBLE_LINE + '\n\n')
     raise KeyboardInterrupt
 
 
 def print_menu(menu):
-    """Self-explanatory."""
+    """Print menu."""
     for index, pizza in enumerate(menu, 1):
-        print('{:>2}. {:<32}{:>21}{:>6.2f}'.format(
-            index, pizza.name, '$', pizza.price))
+        print('{:>2}. {:<52}${:>6.2f}'.format(index, pizza.name, pizza.price))
 
 
 class Order:
     """Hold order information."""
 
     def __init__(self):
+        """Class does not take arguements upon instantiation to set attributes.
+
+        Instead, they are assigned to None to invoke the respective property
+        setters.
+        """
         self.is_delivery = None
         self.customer_name = None
         if self.is_delivery:
@@ -77,10 +87,35 @@ class Order:
         self.item_subtotal = self.pizzas_ordered
 
     def fetch_input(self, prompt, regex, error_message):
-        """Get and evaluate user input."""
+        """Get and evaluate user input.
+
+        Takes user input and check against given regex. Prints given error
+        message when input does not satisfy regex.
+
+        Args
+        ----
+            prompt (str): Message to display to prompt user input.
+            regex (str): Regular expression for the function to check against
+                the provided user input.
+            error_message (str): Message to display when user input does not
+                matches the given regex.
+
+        Returns
+        -------
+            user_input (str): A string that satisfies given regex.
+
+        Raises
+        ------
+            ValueError: If the given input is blank or does not matches regex.
+                Handled within the function to print the given error message
+                and ask user for input again.
+            SystemExit: If the given input matches the special command
+                "<exit>". Simply exits the command.
+
+        """
         while True:
             try:
-                # Get input and strip trailing whitespaces
+                # Get input and strip trailing whitespaces.
                 user_input = input('\n' + prompt + ': ').lower().strip()
 
                 if user_input == '':
@@ -90,7 +125,7 @@ class Order:
                 elif user_input == '<cancel>':
                     confirm_order(False)
                 elif re.match(regex, user_input):
-                    break  # to return input
+                    break  # to return input.
                 else:
                     raise ValueError(error_message)
 
@@ -101,7 +136,7 @@ class Order:
 
     @property
     def is_delivery(self):
-        """bool: Whether order is a delivery."""
+        """bool: True if order is delivery, False otherwise."""
         return self._is_delivery
 
     @is_delivery.setter
@@ -114,7 +149,7 @@ class Order:
 
     @property
     def customer_name(self):
-        """str: Customer name"""
+        """str: Customer name."""
         return self._customer_name
 
     @customer_name.setter
@@ -127,7 +162,19 @@ class Order:
 
     @property
     def address(self):
-        """Address (namedtuple): Order delivery address."""
+        """Address (namedtuple): Order delivery address.
+
+        The attribute address is an instance of a namedtuple object, Address.
+        The attributes of the object are the properties of the address.
+
+        Attributes
+        ----------
+            street (str): Street address.
+            suburb (str): Suburb.
+            town (str): Town.
+            postcode (str): Postcode.
+
+        """
         return self._address
 
     @address.setter
@@ -189,51 +236,59 @@ class Order:
     @property
     def pizzas_ordered(self):
         """dict: Customer order.
-        key: Pizza number
-        value: Amount of pizza
+
+        key (Pizza): instance of Pizza (namedtuple).
+        value: Amount of pizza(s) ordered.
+
         """
         return self._pizzas_ordered
 
     @pizzas_ordered.setter
     def pizzas_ordered(self, _):
-        prompt = ('{} of {}\n'
-                  'Enter a number from 1 to {} to select a pizza.\n'
-                  'Or enter "<finish>" to complete order')
         pizzas_ordered = {}
         ordered_amount = 1
 
-        print('\nSelect a pizza from the menu below.\n'
-              'An order may contain up to {} pizzas.\n'.format(MAX_ORDER_SIZE))
-        # Keep asking till limit is reached
         while ordered_amount < MAX_ORDER_SIZE + 1:
+            # Display menu.
+            print()
             print_menu(PIZZA_LIST)
             try:
-                option_number = int(self.fetch_input(prompt.format(ordered_amount,
-                                                                   MAX_ORDER_SIZE,
-                                                                   MENU_SIZE),
-                                                     PIZZA_MENU_REGEX,
-                                                     'Invalid pizza number.'))
-                print(LINE + '\n')
+                print(dedent("""
+                             Select a pizza from the menu above.
+                             An order may contain up to {} pizzas.
+                             Enter a number from 1 to {} to select a pizza.
+                             Or enter "<finish>" to complete order."""
+                             .format(MAX_ORDER_SIZE, MENU_SIZE)))
 
-                # Check if given option number is valid
+                option_number = int(self.fetch_input(
+                    'Pizza {} of {}'.format(ordered_amount, MAX_ORDER_SIZE),
+                    PIZZA_MENU_REGEX, 'Invalid pizza number.'))
+
+                # Check if given option number is valid.
                 if option_number in range(1, MENU_SIZE + 1):
-                    # Decrement number by one to access index of PIZZA_LIST
+
+                    # Decrement number by one to access index of PIZZA_LIST.
                     option_number -= 1
                     ordered_amount += 1
+                    selected_pizza = PIZZA_LIST[option_number]
+
+                    # Inform user of selected option.
+                    print('Selected {0.name} - ${0.price:.2f}.'.format(selected_pizza))
+
                     try:
-                        # Increment the amount ordered
-                        pizzas_ordered[PIZZA_LIST[option_number]] += 1
+                        # Increment the amount ordered.
+                        pizzas_ordered[selected_pizza] += 1
                     except KeyError:
-                        # Or, create new key with order number
-                        pizzas_ordered[PIZZA_LIST[option_number]] = 1
+                        # Or, create new key with order number.
+                        pizzas_ordered[selected_pizza] = 1
                 else:
                     raise IndexError('Invalid range.')
 
             except IndexError as e:
                 print(ERROR.format(e))
 
-            # Order is finished (cancel before reaching MAX_ORDER_SIZE)
-            # Will fail to parse as base 10, so it must be "<finish>"
+            # Order is finished (cancel before reaching MAX_ORDER_SIZE).
+            # Will fail to parse as base 10, so it must be "<finish>".
             except ValueError:
                 if ordered_amount == 1:
                     print(ERROR.format('You must select at least one pizza.\n'
@@ -245,6 +300,12 @@ class Order:
 
     @property
     def item_subtotal(self):
+        """dict: Subtotal amount for each pizza.
+
+        key (str): Name of pizza.
+        value (tuple): Amount of pizza and the subtotal cost.
+
+        """
         return self._item_subtotal
 
     @item_subtotal.setter
@@ -261,7 +322,7 @@ class Order:
 
     @property
     def total(self):
-        """float: Total order total."""
+        """float: Order total cost."""
         return self._total
 
     @total.setter
@@ -270,6 +331,7 @@ class Order:
 
     def __str__(self):
         """Return the order into a readable 'receipt-like' format."""
+        # Customer details.
         order_type = 'Pick-up'
         customer_details = '''\
         CUSTOMER NAME:       {0.customer_name}
@@ -281,34 +343,36 @@ class Order:
         DELIVERY ADDRESS:    {0.address.street}
                              {0.address.suburb}
                              {0.address.town} {0.address.postcode}'''
-
         customer_details = dedent(customer_details.format(self, order_type))
 
+        # Order details.
         order_details = []
 
         for pizza, value in self.item_subtotal.items():
-            # Unpack tuple
+            # Unpack tuple.
             amount, subtotal = value
+            # Show multiplier if amount > 1.
             amount = '(x{})'.format(amount) if amount > 1 else ''
             order_details.append('{0:<45}'
                                  '{1:<11}'
                                  '${2:>6.2f}'.format(pizza,
                                                      amount,
                                                      subtotal))
-
         order_details = '\n'.join(order_details) + '\n'
 
+        # Order subtotal.
         total_fields = '{:<56}${:>6.2f}'
-
         order_subtotal = []
-        # Amount before delivery charge if order is delivery
-        subtotal = self.total - 3 if self.is_delivery else self.total
+
+        # Set subtotal to amount before delivery surcharge.
+        subtotal = self.total - DELIVERY_CHARGE if self.is_delivery else self.total
         order_subtotal.append(total_fields.format('Subtotal', subtotal))
         if self.is_delivery:
             order_subtotal.append(total_fields.format(
                 'Delivery surcharge', DELIVERY_CHARGE))
         order_subtotal = '\n'.join(order_subtotal)
 
+        # Order total.
         order_total = total_fields.format('Total', self.total)
 
         receipt = '\n'.join(['ORDER CONFIRMATION',
