@@ -74,7 +74,7 @@ class Order:
             self.address = None
             self.phone = None
         self.pizzas_ordered = None
-        self.total = 0.00
+        self.item_subtotal = self.pizzas_ordered
 
     def fetch_input(self, prompt, regex, error_message):
         """Get and evaluate user input."""
@@ -244,6 +244,22 @@ class Order:
         self._pizzas_ordered = pizzas_ordered
 
     @property
+    def item_subtotal(self):
+        return self._item_subtotal
+
+    @item_subtotal.setter
+    def item_subtotal(self, value):
+        item_subtotal = {}
+        self.total = DELIVERY_CHARGE if self.is_delivery else 0
+
+        for pizza, amount in value.items():
+            subtotal = pizza.price * amount
+            item_subtotal[pizza.name] = (amount, subtotal)
+            self.total += subtotal
+
+        self._item_subtotal = item_subtotal
+
+    @property
     def total(self):
         """float: Total order total."""
         return self._total
@@ -253,6 +269,7 @@ class Order:
         self._total = value
 
     def __str__(self):
+        """Return the order into a readable 'receipt-like' format."""
         order_type = 'Pick-up'
         customer_details = '''\
         CUSTOMER NAME:       {0.customer_name}
@@ -267,25 +284,32 @@ class Order:
 
         customer_details = dedent(customer_details.format(self, order_type))
 
-        order_details = ''
+        order_details = []
 
-        for pizza, amount in self.pizzas_ordered.items():
-            item_subtotal = pizza.price * amount
+        for pizza, value in self.item_subtotal.items():
+            # Unpack tuple
+            amount, subtotal = value
             amount = '(x{})'.format(amount) if amount > 1 else ''
-            self.total += item_subtotal
+            order_details.append('{0:<45}'
+                                 '{1:<11}'
+                                 '${2:>6.2f}'.format(pizza,
+                                                     amount,
+                                                     subtotal))
 
-            order_details += '{:<32}{:>17}{:>8}{:>6.2f}\n'.format(
-                pizza.name, amount, '$', item_subtotal)
+        order_details = '\n'.join(order_details) + '\n'
 
-        total_fields = '{:<32}{:>25}{:>6.2f}'
+        total_fields = '{:<56}${:>6.2f}'
 
+        order_subtotal = []
+        # Amount before delivery charge if order is delivery
+        subtotal = self.total - 3 if self.is_delivery else self.total
+        order_subtotal.append(total_fields.format('Subtotal', subtotal))
         if self.is_delivery:
-            order_details += total_fields.format('Subtotal', '$', self.total)
-            order_details += total_fields.format(
-                'Delivery surcharge', '$', DELIVERY_CHARGE)
-            self.total += DELIVERY_CHARGE
+            order_subtotal.append(total_fields.format(
+                'Delivery surcharge', DELIVERY_CHARGE))
+        order_subtotal = '\n'.join(order_subtotal)
 
-        order_total = total_fields.format('TOTAL', '$', self.total)
+        order_total = total_fields.format('Total', self.total)
 
         receipt = '\n'.join(['ORDER CONFIRMATION',
                              DOUBLE_LINE,
@@ -294,6 +318,7 @@ class Order:
                              'ORDER SUMMARY',
                              LINE,
                              order_details,
+                             order_subtotal,
                              LINE,
                              order_total,
                              DOUBLE_LINE
