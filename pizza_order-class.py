@@ -74,6 +74,7 @@ class Order:
             self.address = None
             self.phone = None
         self.pizzas_ordered = None
+        self.total = 0.00
 
     def fetch_input(self, prompt, regex, error_message):
         """Get and evaluate user input."""
@@ -248,9 +249,54 @@ class Order:
         return self._total
 
     @total.setter
-    def total(self):
-        for pizza in self.pizzas_ordered:
-            self._total += pizza.price * self.pizzas_ordered[pizza]
+    def total(self, value):
+        self._total = value
+
+    def __str__(self):
+        order_type = 'Pick-up'
+        customer_details = '''\
+        CUSTOMER NAME:       {0.customer_name}
+        ORDER TYPE:          {1}'''
+        if self.is_delivery:
+            order_type = 'Delivery'
+            customer_details += '''
+        CONTACT NUMBER:      {0.phone}
+        DELIVERY ADDRESS:    {0.address.street}
+                             {0.address.suburb}
+                             {0.address.town} {0.address.postcode}'''
+
+        customer_details = dedent(customer_details.format(self, order_type))
+
+        order_details = ''
+
+        for pizza, amount in self.pizzas_ordered.items():
+            item_subtotal = pizza.price * amount
+            amount = '(x{})'.format(amount) if amount > 1 else ''
+            self.total += item_subtotal
+
+            order_details += '{:<32}{:>17}{:>8}{:>6.2f}\n'.format(
+                pizza.name, amount, '$', item_subtotal)
+
+        total_fields = '{:<32}{:>25}{:>6.2f}'
 
         if self.is_delivery:
-            self._total += DELIVERY_CHARGE
+            order_details += total_fields.format('Subtotal', '$', self.total)
+            order_details += total_fields.format(
+                'Delivery surcharge', '$', DELIVERY_CHARGE)
+            self.total += DELIVERY_CHARGE
+
+        order_total = total_fields.format('TOTAL', '$', self.total)
+
+        receipt = '\n'.join(['ORDER CONFIRMATION',
+                             DOUBLE_LINE,
+                             customer_details,
+                             DOUBLE_LINE + '\n',
+                             'ORDER SUMMARY',
+                             LINE,
+                             order_details,
+                             LINE,
+                             order_total,
+                             DOUBLE_LINE
+                             ])
+
+        return receipt
